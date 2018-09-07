@@ -229,7 +229,7 @@ $(function() {
 							end: function(layero, index){
 								if (needFresh) {
 									//window.location.reload();
-									jobTable.fnDraw();
+									jobTable.fnDraw(false);
 								}
 							}
 						});
@@ -264,7 +264,13 @@ $(function() {
             },
 			author : {
 				required : true
-			}
+			},
+            executorTimeout : {
+                digits:true
+            },
+            executorFailRetryCount : {
+                digits:true
+            }
         }, 
         messages : {  
             jobDesc : {
@@ -275,6 +281,12 @@ $(function() {
             },
             author : {
             	required : I18n.system_please_input + I18n.jobinfo_field_author
+            },
+            executorTimeout : {
+                digits: I18n.system_please_input + I18n.system_digits
+            },
+            executorFailRetryCount : {
+                digits: I18n.system_please_input + I18n.system_digits
             }
         },
 		highlight : function(element) {  
@@ -288,6 +300,20 @@ $(function() {
             element.parent('div').append(error);  
         },
         submitHandler : function(form) {
+
+			// process
+            var executorTimeout = $("#addModal .form input[name='executorTimeout']").val();
+            if(!/^\d+$/.test(executorTimeout)) {
+                executorTimeout = 0;
+			}
+            $("#addModal .form input[name='executorTimeout']").val(executorTimeout);
+            var executorFailRetryCount = $("#addModal .form input[name='executorFailRetryCount']").val();
+            if(!/^\d+$/.test(executorFailRetryCount)) {
+                executorFailRetryCount = 0;
+            }
+            $("#addModal .form input[name='executorFailRetryCount']").val(executorFailRetryCount);
+
+
         	$.post(base_url + "/jobinfo/add",  $("#addModal .form").serialize(), function(data, status) {
     			if (data.code == "200") {
 					$('#addModal').modal('hide');
@@ -344,7 +370,9 @@ $(function() {
 			$("#addModal .form textarea[name='glueSource']").val( $("#addModal .form .glueSource_shell").val() );
 		} else if ('GLUE_PYTHON'==glueType){
 			$("#addModal .form textarea[name='glueSource']").val( $("#addModal .form .glueSource_python").val() );
-		} else if ('GLUE_NODEJS'==glueType){
+		} else if ('GLUE_PHP'==glueType){
+            $("#addModal .form textarea[name='glueSource']").val( $("#addModal .form .glueSource_php").val() );
+        } else if ('GLUE_NODEJS'==glueType){
 			$("#addModal .form textarea[name='glueSource']").val( $("#addModal .form .glueSource_nodejs").val() );			
 		}
 	});
@@ -362,12 +390,13 @@ $(function() {
 		$("#updateModal .form input[name='jobCron']").val( row.jobCron );
 		$("#updateModal .form input[name='author']").val( row.author );
 		$("#updateModal .form input[name='alarmEmail']").val( row.alarmEmail );
+		$("#updateModal .form input[name='executorTimeout']").val( row.executorTimeout );
+        $("#updateModal .form input[name='executorFailRetryCount']").val( row.executorFailRetryCount );
 		$('#updateModal .form select[name=executorRouteStrategy] option[value='+ row.executorRouteStrategy +']').prop('selected', true);
 		$("#updateModal .form input[name='executorHandler']").val( row.executorHandler );
 		$("#updateModal .form input[name='executorParam']").val( row.executorParam );
         $("#updateModal .form input[name='childJobId']").val( row.childJobId );
 		$('#updateModal .form select[name=executorBlockStrategy] option[value='+ row.executorBlockStrategy +']').prop('selected', true);
-		$('#updateModal .form select[name=executorFailStrategy] option[value='+ row.executorFailStrategy +']').prop('selected', true);
 		$('#updateModal .form select[name=glueType] option[value='+ row.glueType +']').prop('selected', true);
 
         $("#updateModal .form select[name=glueType]").change();
@@ -390,7 +419,13 @@ $(function() {
 			},
 			author : {
 				required : true
-			}
+			},
+            executorTimeout : {
+                digits:true
+            },
+            executorFailRetryCount : {
+                digits:true
+            }
 		},
 		messages : {
 			jobDesc : {
@@ -401,7 +436,13 @@ $(function() {
 			},
 			author : {
 				required : I18n.system_please_input + I18n.jobinfo_field_author
-			}
+			},
+            executorTimeout : {
+                digits: I18n.system_please_input + I18n.system_digits
+            },
+            executorFailRetryCount : {
+                digits: I18n.system_please_input + I18n.system_digits
+            }
 		},
 		highlight : function(element) {
             $(element).closest('.form-group').addClass('has-error');  
@@ -414,6 +455,19 @@ $(function() {
             element.parent('div').append(error);  
         },
         submitHandler : function(form) {
+
+            // process
+            var executorTimeout = $("#updateModal .form input[name='executorTimeout']").val();
+            if(!/^\d+$/.test(executorTimeout)) {
+                executorTimeout = 0;
+            }
+            $("#updateModal .form input[name='executorTimeout']").val(executorTimeout);
+            var executorFailRetryCount = $("#updateModal .form input[name='executorFailRetryCount']").val();
+            if(!/^\d+$/.test(executorFailRetryCount)) {
+                executorFailRetryCount = 0;
+            }
+            $("#updateModal .form input[name='executorFailRetryCount']").val(executorFailRetryCount);
+
 			// post
     		$.post(base_url + "/jobinfo/update", $("#updateModal .form").serialize(), function(data, status) {
     			if (data.code == "200") {
